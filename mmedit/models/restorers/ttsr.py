@@ -166,7 +166,7 @@ class TTSR(BasicRestorer):
             if self.transferal_perceptual_loss:
                 set_requires_grad(self.extractor, False)
                 sr_textures = self.extractor((pred + 1.) / 2.)
-                losses['loss_t_perceptual'] = self.transferal_perceptual_loss(
+                losses['loss_transferal'] = self.transferal_perceptual_loss(
                     sr_textures, soft_attention, textures)
                 set_requires_grad(self.extractor, True)
             # gan loss for generator
