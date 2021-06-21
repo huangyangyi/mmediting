@@ -63,11 +63,16 @@ class TTSR(BasicRestorer):
 
         # loss
         self.pixel_loss = build_loss(pixel_loss)
-        self.transferal_perceptual_loss = build_loss(
-            transferal_perceptual_loss) if transferal_perceptual_loss else None
         self.perceptual_loss = build_loss(
             perceptual_loss) if perceptual_loss else None
-
+        if transferal_perceptual_loss:
+            self.transferal_perceptual_loss = build_loss(
+                transferal_perceptual_loss)
+            extractor['requires_grad'] = False
+            self.extractor_copy = build_component(extractor)
+        else:
+            self.transferal_perceptual_loss = None
+            self.extractor_copy = None
         # pretrained
         self.init_weights(pretrained)
 
@@ -164,11 +169,11 @@ class TTSR(BasicRestorer):
                 if loss_style is not None:
                     losses['loss_style'] = loss_style
             if self.transferal_perceptual_loss:
-                set_requires_grad(self.extractor, False)
-                sr_textures = self.extractor((pred + 1.) / 2.)
+                self.extractor_copy.load_state_dict(
+                    self.extractor.state_dict())
+                sr_textures = self.extractor_copy((pred + 1.) / 2.)
                 losses['loss_transferal'] = self.transferal_perceptual_loss(
                     sr_textures, soft_attention, textures)
-                set_requires_grad(self.extractor, True)
             # gan loss for generator
             if self.gan_loss:
                 fake_g_pred = self.discriminator(pred)
