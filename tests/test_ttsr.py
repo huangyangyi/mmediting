@@ -73,13 +73,14 @@ def test_ttsr():
             num_blocks=(16, 16, 8, 4)),
         extractor=dict(type='LTE'),
         transformer=dict(type='SearchTransformer'),
+        discriminator=dict(type='TTSRDiscriminator', in_size=64),
         pixel_loss=dict(type='L1Loss', loss_weight=1.0, reduction='mean'),
         perceptual_loss=dict(
             type='PerceptualLoss',
             layer_weights={'29': 1.0},
             vgg_type='vgg19',
             perceptual_weight=1e-2,
-            style_weight=0,
+            style_weight=0.001,
             criterion='mse'),
         transferal_perceptual_loss=dict(
             type='TransferalPerceptualLoss',
